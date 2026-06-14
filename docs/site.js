@@ -3,6 +3,7 @@ const header = document.querySelector("[data-site-header]");
 const revealItems = [...document.querySelectorAll(".reveal")];
 const counters = [...document.querySelectorAll("[data-count-to]")];
 const navLinks = [...document.querySelectorAll("[data-nav-link]")];
+const expandableSections = [...document.querySelectorAll("[data-expandable-section]")];
 const navSections = navLinks
     .map((link) => document.getElementById(link.dataset.navLink))
     .filter(Boolean);
@@ -35,6 +36,24 @@ function updateActiveNav() {
 
 updateActiveNav();
 window.addEventListener("scroll", updateActiveNav, { passive: true });
+
+expandableSections.forEach((section) => {
+    const button = section.querySelector("[data-expand-toggle]");
+
+    if (!button) {
+        return;
+    }
+
+    button.addEventListener("click", () => {
+        const expanded = section.classList.toggle("is-expanded");
+        button.textContent = expanded ? "Show Less" : "Show More";
+        button.setAttribute("aria-expanded", String(expanded));
+
+        if (!expanded && window.matchMedia("(max-width: 640px)").matches) {
+            section.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+        }
+    });
+});
 
 function setCounterValue(counter, value) {
     counter.textContent = `${Math.round(value).toLocaleString()}${counter.dataset.countSuffix || ""}`;

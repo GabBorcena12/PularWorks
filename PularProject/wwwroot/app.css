@@ -792,6 +792,35 @@ h3 {
     transform: translateX(110%);
 }
 
+.section-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    min-height: 46px;
+    padding: 12px 20px;
+    margin: 24px auto 0;
+    border: 1px solid rgba(246, 183, 60, 0.42);
+    border-radius: 999px;
+    color: var(--white);
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.95), rgba(211, 95, 0, 0.95));
+    box-shadow: 0 16px 34px rgba(249, 115, 22, 0.22);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+}
+
+.section-toggle:hover,
+.section-toggle:focus-visible {
+    transform: translateY(-2px);
+    border-color: rgba(246, 183, 60, 0.72);
+    box-shadow: 0 20px 44px rgba(249, 115, 22, 0.28);
+}
+
 .facebook-card::before {
     display: none;
 }
@@ -1739,6 +1768,10 @@ h3 {
         grid-template-columns: 1fr 1fr;
     }
 
+    .product-image img {
+        scale: 1.7;
+    }
+
     .project-grid,
     .stats-grid,
     .trust-strip {
@@ -1838,11 +1871,26 @@ h3 {
         grid-template-columns: 1fr;
     }
 
+    .product-image img {
+        scale: 1.45;
+    }
+
     .project-grid,
     .stats-grid,
     .trust-strip {
         grid-template-columns: 1fr;
         gap: 12px;
+    }
+
+    .expandable-section .section-toggle {
+        display: flex;
+    }
+
+    .expandable-section:not(.is-expanded)[data-mobile-visible-count="2"] .product-card:nth-child(n + 3),
+    .expandable-section:not(.is-expanded)[data-mobile-visible-count="2"] .project-card:nth-child(n + 3),
+    .expandable-section:not(.is-expanded)[data-mobile-visible-count="3"] .product-card:nth-child(n + 4),
+    .expandable-section:not(.is-expanded)[data-mobile-visible-count="3"] .project-card:nth-child(n + 4) {
+        display: none;
     }
 
     .trust-strip {
@@ -2005,6 +2053,10 @@ h3 {
     .btn {
         max-width: 100%;
         width: 100%;
+    }
+
+    .product-image img {
+        scale: 1.25;
     }
 
     .floating-contact {
