@@ -7,7 +7,9 @@
         "launchBrowser": true,
         "applicationUrl": "http://localhost:5079",
         "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development"
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "STATIC_FORMS_ACCESS_KEY": "__STATIC_FORMS_API_KEY__",
+          "STATIC_FORMS_RECEIVER_EMAIL": "dummyaccount@gmail.com"
         }
       },
       "https": {
@@ -16,7 +18,9 @@
         "launchBrowser": true,
         "applicationUrl": "https://localhost:7269;http://localhost:5079",
         "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development"
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "STATIC_FORMS_ACCESS_KEY": "__STATIC_FORMS_API_KEY__",
+          "STATIC_FORMS_RECEIVER_EMAIL": "dummyaccount@gmail.com"
         }
       }
     }

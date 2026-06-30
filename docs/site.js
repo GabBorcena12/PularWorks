@@ -5,6 +5,11 @@ const counters = [...document.querySelectorAll("[data-count-to]")];
 const navLinks = [...document.querySelectorAll("[data-nav-link]")];
 const expandableSections = [...document.querySelectorAll("[data-expandable-section]")];
 const contactDropdowns = [...document.querySelectorAll("[data-contact-dropdown]")];
+const inquiryForm = document.querySelector(".inquiry-form");
+const inquiryStatus = document.getElementById("form-success");
+const inquiryModal = document.getElementById("thank-you-modal");
+const inquiryModalCloseButtons = [...document.querySelectorAll(".thank-you-modal-close")];
+const inquiryConfigData = document.getElementById("inquiry-config-data");
 const navSections = navLinks
     .map((link) => document.getElementById(link.dataset.navLink))
     .filter(Boolean);
@@ -102,8 +107,174 @@ document.addEventListener("click", (event) => {
 document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
         contactDropdowns.forEach(closeContactDropdown);
+        closeThankYouModal();
     }
 });
+
+function setFormStatus(element, state, message) {
+    if (!element) {
+        return;
+    }
+
+    element.textContent = message;
+    element.classList.remove("error", "success");
+
+    if (state) {
+        element.classList.add(state);
+    }
+}
+
+function openThankYouModal() {
+    if (!inquiryModal) {
+        return;
+    }
+
+    inquiryModal.classList.add("is-open");
+    inquiryModal.setAttribute("aria-hidden", "false");
+}
+
+function closeThankYouModal() {
+    if (!inquiryModal) {
+        return;
+    }
+
+    inquiryModal.classList.remove("is-open");
+    inquiryModal.setAttribute("aria-hidden", "true");
+}
+
+function readInlineInquiryConfig() {
+    if (!inquiryConfigData?.textContent) {
+        return {};
+    }
+
+    try {
+        return JSON.parse(inquiryConfigData.textContent);
+    } catch (error) {
+        console.error("Unable to parse inquiry config.", error);
+        return {};
+    }
+}
+
+async function loadInquiryConfig() {
+    const inlineConfig = readInlineInquiryConfig();
+    const configUrl = new URL("config/inquiry-config.json", document.baseURI);
+
+    try {
+        const response = await fetch(configUrl, {
+            cache: "no-store",
+            headers: {
+                "Accept": "application/json"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Request failed with ${response.status}`);
+        }
+
+        const remoteConfig = await response.json();
+        return { ...inlineConfig, ...remoteConfig };
+    } catch (error) {
+        console.warn("Falling back to inline inquiry config.", error);
+        return inlineConfig;
+    }
+}
+
+function applyInquiryConfig(form, config) {
+    if (!form || !config) {
+        return;
+    }
+
+    if (config.staticFormsEndpoint) {
+        form.action = config.staticFormsEndpoint;
+    }
+
+    const apiKeyInput = form.querySelector('input[name="apiKey"]');
+    if (apiKeyInput && config.apiKey) {
+        apiKeyInput.value = config.apiKey;
+    }
+}
+
+async function initializeInquiryForm() {
+    if (!inquiryForm) {
+        return;
+    }
+
+    const config = await loadInquiryConfig();
+    applyInquiryConfig(inquiryForm, config);
+
+    inquiryForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        if (inquiryForm.dataset.submitting === "true") {
+            return;
+        }
+
+        if (!inquiryForm.checkValidity()) {
+            inquiryForm.reportValidity();
+            return;
+        }
+
+        const formData = new FormData(inquiryForm);
+        if (String(formData.get("honeypot") || "").trim()) {
+            inquiryForm.reset();
+            return;
+        }
+
+        const submitButton = inquiryForm.querySelector("button[type='submit']");
+        const submitLabel = submitButton?.dataset.submitLabel || "Submit Inquiry";
+
+        inquiryForm.dataset.submitting = "true";
+        inquiryForm.classList.add("is-submitting");
+        setFormStatus(inquiryStatus, "", "");
+
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = "Sending...";
+        }
+
+        try {
+            const response = await fetch(inquiryForm.action, {
+                method: inquiryForm.method || "POST",
+                headers: {
+                    "Accept": "application/json"
+                },
+                body: formData
+            });
+            const result = await response.json().catch(() => ({}));
+
+            if (!response.ok || result.success === false) {
+                throw new Error(result.message || "The inquiry could not be sent.");
+            }
+
+            inquiryForm.reset();
+            setFormStatus(inquiryStatus, "success", "Your inquiry has been sent successfully.");
+            openThankYouModal();
+        } catch (error) {
+            console.error(error);
+            setFormStatus(inquiryStatus, "error", "Something went wrong. Please try again.");
+        } finally {
+            delete inquiryForm.dataset.submitting;
+            inquiryForm.classList.remove("is-submitting");
+
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = submitLabel;
+            }
+        }
+    });
+}
+
+inquiryModalCloseButtons.forEach((button) => {
+    button.addEventListener("click", closeThankYouModal);
+});
+
+inquiryModal?.addEventListener("click", (event) => {
+    if (event.target === inquiryModal) {
+        closeThankYouModal();
+    }
+});
+
+initializeInquiryForm();
 
 function setCounterValue(counter, value) {
     counter.textContent = `${Math.round(value).toLocaleString()}${counter.dataset.countSuffix || ""}`;
