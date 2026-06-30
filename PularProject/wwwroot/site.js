@@ -4,6 +4,7 @@ const revealItems = [...document.querySelectorAll(".reveal")];
 const counters = [...document.querySelectorAll("[data-count-to]")];
 const navLinks = [...document.querySelectorAll("[data-nav-link]")];
 const expandableSections = [...document.querySelectorAll("[data-expandable-section]")];
+const contactDropdowns = [...document.querySelectorAll("[data-contact-dropdown]")];
 const navSections = navLinks
     .map((link) => document.getElementById(link.dataset.navLink))
     .filter(Boolean);
@@ -53,6 +54,55 @@ expandableSections.forEach((section) => {
             section.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
         }
     });
+});
+
+function closeContactDropdown(dropdown) {
+    const toggle = dropdown.querySelector("[data-contact-dropdown-toggle]");
+    const menu = dropdown.querySelector("[data-contact-dropdown-menu]");
+
+    if (!toggle || !menu) {
+        return;
+    }
+
+    toggle.setAttribute("aria-expanded", "false");
+    menu.hidden = true;
+}
+
+contactDropdowns.forEach((dropdown) => {
+    const toggle = dropdown.querySelector("[data-contact-dropdown-toggle]");
+    const menu = dropdown.querySelector("[data-contact-dropdown-menu]");
+
+    if (!toggle || !menu) {
+        return;
+    }
+
+    toggle.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const isExpanded = toggle.getAttribute("aria-expanded") === "true";
+
+        contactDropdowns.forEach((item) => {
+            if (item !== dropdown) {
+                closeContactDropdown(item);
+            }
+        });
+
+        toggle.setAttribute("aria-expanded", String(!isExpanded));
+        menu.hidden = isExpanded;
+    });
+});
+
+document.addEventListener("click", (event) => {
+    contactDropdowns.forEach((dropdown) => {
+        if (!dropdown.contains(event.target)) {
+            closeContactDropdown(dropdown);
+        }
+    });
+});
+
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+        contactDropdowns.forEach(closeContactDropdown);
+    }
 });
 
 function setCounterValue(counter, value) {
