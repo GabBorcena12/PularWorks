@@ -316,23 +316,27 @@
                             </label>
                             <label class="inquiry-field">
                                 <span>Email Address</span>
-                                <input type="email" name="email-address" autocomplete="email" />
+                                <input type="email" name="email-address" autocomplete="email" required />
+                            </label>
+                            <label class="inquiry-field">
+                                <span>Contact Number</span>
+                                <input type="tel" name="contact-number" autocomplete="tel" inputmode="tel" required />
                             </label>
                             <label class="inquiry-field">
                                 <span>kVA Rating</span>
-                                <input type="text" name="kva-rating" />
+                                <input type="text" name="kva-rating" required />
                             </label>
                             <label class="inquiry-field">
                                 <span>Primary Voltage</span>
-                                <input type="text" name="primary-voltage" />
+                                <input type="text" name="primary-voltage" required />
                             </label>
                             <label class="inquiry-field">
                                 <span>Secondary Voltage</span>
-                                <input type="text" name="secondary-voltage" />
+                                <input type="text" name="secondary-voltage" required />
                             </label>
                             <label class="inquiry-field">
                                 <span>Connection</span>
-                                <select name="connection">
+                                <select name="connection" required>
                                     <option value="">Select connection</option>
                                     <option>Auto Type</option>
                                     <option>Induction</option>
@@ -340,7 +344,7 @@
                             </label>
                             <label class="inquiry-field">
                                 <span>Phase</span>
-                                <select name="phase">
+                                <select name="phase" required>
                                     <option value="">Select phase</option>
                                     <option>3 Phase</option>
                                     <option>Single Phase</option>
@@ -348,7 +352,7 @@
                             </label>
                             <label class="inquiry-field inquiry-field-full">
                                 <span>Winding</span>
-                                <select name="winding">
+                                <select name="winding" required>
                                     <option value="">Select winding</option>
                                     <option>Aluminum</option>
                                     <option>Copper</option>

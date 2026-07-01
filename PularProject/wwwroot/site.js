@@ -194,6 +194,35 @@ function applyInquiryConfig(form, config) {
     }
 }
 
+function isSupportedPhilippineContactNumber(value) {
+    const trimmed = value.trim();
+    const digits = trimmed.replace(/\D/g, "");
+
+    if (!trimmed || !/^[+()\-\s\d]+$/.test(trimmed)) {
+        return false;
+    }
+
+    return digits.length >= 7 && digits.length <= 13;
+}
+
+function validateContactNumberField(field) {
+    if (!field) {
+        return;
+    }
+
+    const value = field.value.trim();
+    field.setCustomValidity("");
+
+    if (!value) {
+        field.setCustomValidity("Please enter your contact number.");
+        return;
+    }
+
+    if (!isSupportedPhilippineContactNumber(value)) {
+        field.setCustomValidity("Please enter a valid contact number.");
+    }
+}
+
 async function initializeInquiryForm() {
     if (!inquiryForm) {
         return;
@@ -202,12 +231,24 @@ async function initializeInquiryForm() {
     const config = await loadInquiryConfig();
     applyInquiryConfig(inquiryForm, config);
 
+    const contactNumberInput = inquiryForm.querySelector('input[name="contact-number"]');
+
+    contactNumberInput?.addEventListener("input", () => {
+        validateContactNumberField(contactNumberInput);
+    });
+
+    contactNumberInput?.addEventListener("invalid", () => {
+        validateContactNumberField(contactNumberInput);
+    });
+
     inquiryForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
-        if (inquiryForm.dataset.submitting === "true") {
+        if (inquiryForm.dataset.submitting === "true" || inquiryForm.dataset.submitted === "true") {
             return;
         }
+
+        validateContactNumberField(contactNumberInput);
 
         if (!inquiryForm.checkValidity()) {
             inquiryForm.reportValidity();
@@ -229,7 +270,7 @@ async function initializeInquiryForm() {
 
         if (submitButton) {
             submitButton.disabled = true;
-            submitButton.textContent = "Sending...";
+            submitButton.textContent = "Submitting...";
         }
 
         try {
@@ -246,20 +287,26 @@ async function initializeInquiryForm() {
                 throw new Error(result.message || "The inquiry could not be sent.");
             }
 
-            inquiryForm.reset();
             setFormStatus(inquiryStatus, "success", "Your inquiry has been sent successfully.");
+            inquiryForm.dataset.submitted = "true";
+
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = "Inquiry Submitted";
+            }
+
             openThankYouModal();
         } catch (error) {
             console.error(error);
             setFormStatus(inquiryStatus, "error", "Something went wrong. Please try again.");
-        } finally {
             delete inquiryForm.dataset.submitting;
-            inquiryForm.classList.remove("is-submitting");
 
             if (submitButton) {
                 submitButton.disabled = false;
                 submitButton.textContent = submitLabel;
             }
+        } finally {
+            inquiryForm.classList.remove("is-submitting");
         }
     });
 }
